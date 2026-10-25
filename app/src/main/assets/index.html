@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI Atlas – every AI tool, free and paid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef0f9;--surface:#fff;--ink:#1b1f4b;--mute:#5d6290;--line:#d9dcee;--free:#0f8a5f;--freebg:#dcf5ea;--mix:#9a6a00;--mixbg:#fff0cc;--paid:#b3304f;--paidbg:#fde0e7;--accent:#4a45e0;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11142e;--surface:#1b1f45;--ink:#eceefd;--mute:#a2a7d6;--line:#2e3366;--free:#5be0ac;--freebg:#12382e;--mix:#ffd166;--mixbg:#3b3012;--paid:#ff8fa8;--paidbg:#451a29;--accent:#8c88ff}}
+:root[data-theme="dark"]{--bg:#11142e;--surface:#1b1f45;--ink:#eceefd;--mute:#a2a7d6;--line:#2e3366;--free:#5be0ac;--freebg:#12382e;--mix:#ffd166;--mixbg:#3b3012;--paid:#ff8fa8;--paidbg:#451a29;--accent:#8c88ff}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+header{padding:28px 18px 8px;max-width:1100px;margin:0 auto}
+h1{font:800 clamp(34px,8vw,60px)/1 "Bricolage Grotesque",Georgia,serif;margin:0 0 10px;letter-spacing:-.02em}
+header p{margin:0;color:var(--mute);max-width:52ch}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:14px 18px 10px;max-width:1100px;margin:0 auto}
+.bar:before{content:"";position:absolute;inset:0 -100vw;background:var(--bg);z-index:-1;border-bottom:1px solid var(--line)}
+input[type=search]{width:100%;padding:13px 16px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit}
+input[type=search]:focus,button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.row{display:flex;gap:8px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none}
+.row::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 14px;border-radius:999px;font:500 14px "DM Sans",sans-serif;cursor:pointer;display:flex;gap:6px;align-items:center}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.price .chip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff}
+main{max-width:1100px;margin:0 auto;padding:6px 18px 60px}
+.count{color:var(--mute);font-size:14px;margin:14px 0 4px}
+section{margin-top:26px}
+h2{font:600 22px "Bricolage Grotesque",Georgia,serif;margin:0 0 12px;display:flex;align-items:center;gap:10px}
+h2 small{font:400 14px "DM Sans",sans-serif;color:var(--mute)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.card{display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:18px;background:var(--surface);border:1px solid var(--line);color:inherit;text-decoration:none;border-top:4px solid var(--c);transition:transform .15s,box-shadow .15s}
+.card:hover{transform:translateY(-3px);box-shadow:0 10px 24px -12px var(--c)}
+.top{display:flex;align-items:center;gap:10px}
+.ico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:21px;background:color-mix(in srgb,var(--c) 18%,transparent)}
+.name{font-weight:700;flex:1}
+.tag{font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px}
+.Free{background:var(--freebg);color:var(--free)}.Freemium{background:var(--mixbg);color:var(--mix)}.Paid{background:var(--paidbg);color:var(--paid)}
+.desc{margin:0;color:var(--mute);font-size:14.5px}
+.empty{padding:40px 0;text-align:center;color:var(--mute)}
+footer{max-width:1100px;margin:0 auto;padding:0 18px 40px;color:var(--mute);font-size:13px}
+@media(prefers-reduced-motion:reduce){.card{transition:none}}
+</style>
+</head>
+<body>
+<header>
+<h1>AI Atlas</h1>
+<p>Every major AI tool in one place, sorted by what it does and what it costs. Tap a card to open the tool.</p>
+</header>
+<div class="bar">
+<input id="q" type="search" placeholder="Search tools, e.g. video, code, voice" aria-label="Search AI tools">
+<div class="row price" id="price" role="group" aria-label="Filter by price"></div>
+<div class="row" id="cats" role="group" aria-label="Filter by category"></div>
+</div>
+<main><div class="count" id="count"></div><div id="out"></div></main>
+<footer>Plans and prices change often, so check each site for current limits. “Freemium” means a free tier plus paid upgrades.</footer>
+<script>
+var C={chat:["Chat assistants","💬","#4a45e0"],img:["Image","🎨","#d6336c"],vid:["Video","🎬","#e8590c"],aud:["Voice and music","🎧","#0c8599"],code:["Coding","⌨️","#2f9e44"],write:["Writing","✍️","#9c36b5"],res:["Research and productivity","🔎","#1971c2"],open:["Open source and local","🧩","#6c757d"]};
+var T=[
+["ChatGPT","chat","Freemium","General assistant for writing, analysis, images and voice.","chatgpt.com"],
+["Claude","chat","Freemium","Thoughtful assistant strong at long documents, writing and code.","claude.ai"],
+["Gemini","chat","Freemium","Google’s assistant, built into Search, Docs and Android.","gemini.google.com"],
+["Microsoft Copilot","chat","Freemium","Assistant inside Windows, Edge and Microsoft 365.","copilot.microsoft.com"],
+["Perplexity","chat","Freemium","Answer engine that cites its web sources.","perplexity.ai"],
+["Grok","chat","Freemium","xAI’s assistant with live access to posts on X.","grok.com"],
+["DeepSeek","chat","Free","Free reasoning and chat models, also available as open weights.","chat.deepseek.com"],
+["Le Chat","chat","Freemium","Mistral’s fast European assistant.","chat.mistral.ai"],
+["Meta AI","chat","Free","Free assistant across WhatsApp, Instagram and Messenger.","meta.ai"],
+["Pi","chat","Free","Friendly, conversational assistant for everyday talk.","pi.ai"],
+["Midjourney","img","Paid","Highly artistic image generation with a distinct look.","midjourney.com"],
+["Leonardo.ai","img","Freemium","Image generation with style controls and daily free credits.","leonardo.ai"],
+["Ideogram","img","Freemium","Strong at readable text inside generated images.","ideogram.ai"],
+["Adobe Firefly","img","Freemium","Image tools trained for commercial use, linked to Photoshop.","firefly.adobe.com"],
+["Canva Magic Studio","img","Freemium","Design suite with AI images, resize and background tools.","canva.com"],
+["Bing Image Creator","img","Free","Free image generation from Microsoft.","bing.com/images/create"],
+["Stable Diffusion","img","Free","Open image models you can run yourself.","stability.ai"],
+["Runway","vid","Freemium","Text and image to video, plus editing tools.","runwayml.com"],
+["Sora","vid","Paid","OpenAI’s text-to-video generator.","sora.com"],
+["Pika","vid","Freemium","Quick, playful video clips from prompts.","pika.art"],
+["Luma Dream Machine","vid","Freemium","Realistic video generation from text or images.","lumalabs.ai"],
+["Kling","vid","Freemium","Long, detailed video clips from text or images.","klingai.com"],
+["HeyGen","vid","Freemium","Talking avatars and video translation.","heygen.com"],
+["Synthesia","vid","Paid","AI presenters for training and business videos.","synthesia.io"],
+["CapCut","vid","Freemium","Mobile and desktop video editor with AI captions and effects.","capcut.com"],
+["ElevenLabs","aud","Freemium","Lifelike voices, voice cloning and dubbing.","elevenlabs.io"],
+["Suno","aud","Freemium","Turns a text prompt into a full song with vocals.","suno.com"],
+["Udio","aud","Freemium","High-quality music generation from descriptions.","udio.com"],
+["Descript","aud","Freemium","Edit audio and video by editing the transcript.","descript.com"],
+["Otter.ai","aud","Freemium","Meeting recordings with live transcripts and summaries.","otter.ai"],
+["GitHub Copilot","code","Freemium","Autocomplete and chat inside your editor.","github.com/features/copilot"],
+["Cursor","code","Freemium","Code editor built around AI chat and edits.","cursor.com"],
+["Claude Code","code","Paid","Agent that works on your codebase from the terminal.","claude.com/product/claude-code"],
+["Replit","code","Freemium","Build and host apps from a prompt in the browser.","replit.com"],
+["Windsurf","code","Freemium","AI-first editor with an agent that edits across files.","windsurf.com"],
+["Bolt.new","code","Freemium","Describe an app and get a running full-stack project.","bolt.new"],
+["Lovable","code","Freemium","Turns ideas into working web apps without much code.","lovable.dev"],
+["v0","code","Freemium","Generates interface components from prompts.","v0.dev"],
+["Google AI Studio","code","Free","Try Gemini models and build with the API at no cost to start.","aistudio.google.com"],
+["Grammarly","write","Freemium","Grammar, tone and rewriting help wherever you type.","grammarly.com"],
+["Jasper","write","Paid","Marketing copy and brand-voice writing for teams.","jasper.ai"],
+["QuillBot","write","Freemium","Paraphrasing, summarizing and grammar checking.","quillbot.com"],
+["Copy.ai","write","Freemium","Sales and marketing content workflows.","copy.ai"],
+["DeepL","write","Freemium","Accurate translation and the DeepL Write editor.","deepl.com"],
+["Notion AI","write","Paid","Writing, search and summaries inside your Notion workspace.","notion.com/product/ai"],
+["NotebookLM","res","Free","Ask questions of your own sources and get audio overviews.","notebooklm.google.com"],
+["Elicit","res","Freemium","Finds and summarizes academic papers.","elicit.com"],
+["Consensus","res","Freemium","Answers research questions from peer-reviewed studies.","consensus.app"],
+["Gamma","res","Freemium","Makes slide decks and pages from a prompt.","gamma.app"],
+["Zapier","res","Freemium","Connects apps and automates tasks with AI steps.","zapier.com"],
+["Hugging Face","open","Free","Hub of open models, datasets and demo apps.","huggingface.co"],
+["Ollama","open","Free","Run open language models on your own computer.","ollama.com"],
+["LM Studio","open","Free","Desktop app to download and chat with local models.","lmstudio.ai"],
+["ComfyUI","open","Free","Node-based workflow tool for open image and video models.","comfy.org"],
+["Open WebUI","open","Free","Self-hosted chat interface for local or API models.","openwebui.com"]
+];
+var st={q:"",p:"All",c:"all"};
+function chip(el,label,key,val,ico){var b=document.createElement("button");b.className="chip";b.type="button";b.innerHTML=(ico?ico+" ":"")+label;b.onclick=function(){st[key]=val;draw()};b.dataset.k=key;b.dataset.v=val;el.appendChild(b)}
+["All","Free","Freemium","Paid"].forEach(function(p){chip(document.getElementById("price"),p,"p",p)});
+chip(document.getElementById("cats"),"All categories","c","all","✨");
+Object.keys(C).forEach(function(k){chip(document.getElementById("cats"),C[k][0],"c",k,C[k][1])});
+document.getElementById("q").oninput=function(e){st.q=e.target.value.toLowerCase();draw()};
+function esc(s){return s.replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function draw(){
+document.querySelectorAll(".chip").forEach(function(b){b.setAttribute("aria-pressed",String(st[b.dataset.k]===b.dataset.v))});
+var list=T.filter(function(t){return(st.p==="All"||t[2]===st.p)&&(st.c==="all"||t[1]===st.c)&&(!st.q||(t[0]+" "+t[3]+" "+C[t[1]][0]).toLowerCase().indexOf(st.q)>-1)});
+document.getElementById("count").textContent=list.length+" of "+T.length+" tools";
+var out=document.getElementById("out");
+if(!list.length){out.innerHTML='<div class="empty">No tools match. Clear the search or pick another filter.</div>';return}
+out.innerHTML=Object.keys(C).map(function(k){
+var g=list.filter(function(t){return t[1]===k});if(!g.length)return"";
+return'<section><h2><span>'+C[k][1]+'</span>'+C[k][0]+' <small>'+g.length+'</small></h2><div class="grid">'+g.map(function(t){
+return'<a class="card" style="--c:'+C[k][2]+'" href="https://'+esc(t[4])+'" target="_blank" rel="noopener noreferrer"><div class="top"><div class="ico">'+C[k][1]+'</div><div class="name">'+esc(t[0])+'</div><span class="tag '+t[2]+'">'+t[2]+'</span></div><p class="desc">'+esc(t[3])+'</p></a>'}).join("")+'</div></section>'}).join("")}
+draw();
+</script>
+</body>
+</html>
