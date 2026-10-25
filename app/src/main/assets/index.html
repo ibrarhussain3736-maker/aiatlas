@@ -41,6 +41,25 @@ h2 small{font:400 14px "DM Sans",sans-serif;color:var(--mute)}
 .Free{background:var(--freebg);color:var(--free)}.Freemium{background:var(--mixbg);color:var(--mix)}.Paid{background:var(--paidbg);color:var(--paid)}
 .desc{margin:0;color:var(--mute);font-size:14.5px}
 .empty{padding:40px 0;text-align:center;color:var(--mute)}
+.fav{border:0;background:none;font-size:22px;line-height:1;cursor:pointer;padding:4px;color:var(--mute)}.fav[aria-pressed=true]{color:#e03131}
+.go{margin-top:16px;border:0;background:var(--accent);color:#fff;font:700 15px "DM Sans",sans-serif;padding:12px 20px;border-radius:14px;cursor:pointer}
+.wiz{max-width:1100px;margin:10px auto 0;padding:0 18px}
+.wiz>div{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:18px}
+.wiz h3{margin:16px 0 8px;font:600 17px "Bricolage Grotesque",Georgia,serif}
+.wiz h3:first-child{margin-top:0}
+.wiz .row{flex-wrap:wrap;overflow:visible}
+.wiz .grid{margin-top:4px}
+.wiz p{margin:12px 0 0;color:var(--mute);font-size:14px}
+.wiz .card .desc{margin:0}
+.stacks{max-width:1100px;margin:22px auto 0;padding:0 18px}
+.stacks p{margin:0 0 6px;color:var(--mute);font-size:14px}
+.stacks .row{padding-bottom:8px}
+.stack{flex:none;width:190px;text-align:left;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:18px;padding:14px;cursor:pointer;font:inherit;display:flex;flex-direction:column;gap:4px}
+.stack b{font-weight:700}
+.stack span{color:var(--mute);font-size:13px}
+.stack .e{font-size:26px}
+.stack[aria-pressed=true]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset}
+#stackOut .grid{margin-top:10px}
 footer{max-width:1100px;margin:0 auto;padding:0 18px 40px;color:var(--mute);font-size:13px}
 @media(prefers-reduced-motion:reduce){.card{transition:none}}
 </style>
@@ -49,7 +68,10 @@ footer{max-width:1100px;margin:0 auto;padding:0 18px 40px;color:var(--mute);font
 <header>
 <h1>AI Atlas</h1>
 <p>Every major AI tool in one place, sorted by what it does and what it costs. Tap a card to open the tool.</p>
+<button class="go" id="goBtn" type="button" aria-expanded="false">Help me choose</button>
 </header>
+<div class="wiz" id="wiz" hidden><div id="wizBody"></div></div>
+<div class="stacks"><h2>Starter stacks</h2><p>Ready-made sets of tools for one goal. Tap a stack to see what is inside.</p><div class="row" id="stackRow"></div><div id="stackOut"></div></div>
 <div class="bar">
 <input id="q" type="search" placeholder="Search tools, e.g. video, code, voice" aria-label="Search AI tools">
 <div class="row price" id="price" role="group" aria-label="Filter by price"></div>
@@ -58,7 +80,7 @@ footer{max-width:1100px;margin:0 auto;padding:0 18px 40px;color:var(--mute);font
 <main><div class="count" id="count"></div><div id="out"></div></main>
 <footer>Plans and prices change often, so check each site for current limits. “Freemium” means a free tier plus paid upgrades.</footer>
 <script>
-var C={chat:["Chat assistants","💬","#4a45e0"],img:["Image","🎨","#d6336c"],vid:["Video","🎬","#e8590c"],aud:["Voice and music","🎧","#0c8599"],code:["Coding","⌨️","#2f9e44"],write:["Writing","✍️","#9c36b5"],res:["Research and productivity","🔎","#1971c2"],open:["Open source and local","🧩","#6c757d"]};
+var C={chat:["Chat assistants","💬","#4a45e0"],img:["Image","🎨","#d6336c"],vid:["Video","🎬","#e8590c"],aud:["Voice and music","🎧","#0c8599"],code:["Coding","⌨️","#2f9e44"],write:["Writing","✍️","#9c36b5"],res:["Research and productivity","🔎","#1971c2"],open:["Open source and local","🧩","#6c757d"],biz:["Agents and business","🤖","#c2255c"]};
 var T=[
 ["ChatGPT","chat","Freemium","General assistant for writing, analysis, images and voice.","chatgpt.com"],
 ["Claude","chat","Freemium","Thoughtful assistant strong at long documents, writing and code.","claude.ai"],
@@ -114,25 +136,98 @@ var T=[
 ["Ollama","open","Free","Run open language models on your own computer.","ollama.com"],
 ["LM Studio","open","Free","Desktop app to download and chat with local models.","lmstudio.ai"],
 ["ComfyUI","open","Free","Node-based workflow tool for open image and video models.","comfy.org"],
-["Open WebUI","open","Free","Self-hosted chat interface for local or API models.","openwebui.com"]
+["Open WebUI","open","Free","Self-hosted chat interface for local or API models.","openwebui.com"],
+["Poe","chat","Freemium","One app to chat with many different AI models and bots.","poe.com"],
+["Character.AI","chat","Freemium","Chat with custom characters and personas.","character.ai"],
+["Qwen Chat","chat","Free","Alibaba’s free assistant, with open-weight models behind it.","chat.qwen.ai"],
+["Kimi","chat","Free","Moonshot AI’s assistant, good with very long documents.","kimi.com"],
+["You.com","chat","Freemium","Search and chat that lets you pick between models.","you.com"],
+["Duck.ai","chat","Free","Private chat with several models, no account needed.","duckduckgo.com/aichat"],
+["Krea","img","Freemium","Real-time image generation, upscaling and video.","krea.ai"],
+["Playground","img","Freemium","Image and graphic design generator with a canvas editor.","playground.com"],
+["Recraft","img","Freemium","Vector art, icons and brand-consistent images.","recraft.ai"],
+["Photoroom","img","Freemium","Background removal and product photos on your phone.","photoroom.com"],
+["remove.bg","img","Freemium","Removes image backgrounds in a couple of seconds.","remove.bg"],
+["Upscayl","img","Free","Open-source app that upscales low-resolution images.","upscayl.org"],
+["Hailuo AI","vid","Freemium","MiniMax’s video generator with smooth motion.","hailuoai.video"],
+["Veo","vid","Paid","Google DeepMind’s video model, with sound, through Gemini.","deepmind.google/models/veo"],
+["Captions","vid","Freemium","Auto captions, eye-contact fix and AI video editing.","captions.ai"],
+["Opus Clip","vid","Freemium","Cuts long videos into short clips for social media.","opus.pro"],
+["InVideo AI","vid","Freemium","Makes a finished video from a text prompt.","invideo.io"],
+["D-ID","vid","Freemium","Animates photos into talking video avatars.","d-id.com"],
+["Murf","aud","Freemium","Studio-quality voiceovers in many voices and languages.","murf.ai"],
+["Speechify","aud","Freemium","Reads articles, PDFs and books aloud in natural voices.","speechify.com"],
+["Fireflies.ai","aud","Freemium","Records, transcribes and summarizes your meetings.","fireflies.ai"],
+["Adobe Podcast","aud","Freemium","Cleans up voice recordings to sound like a studio.","podcast.adobe.com"],
+["Krisp","aud","Freemium","Removes background noise from calls and takes meeting notes.","krisp.ai"],
+["Gemini CLI","code","Free","Open-source Gemini agent that runs in your terminal.","github.com/google-gemini/gemini-cli"],
+["OpenAI Codex","code","Paid","Coding agent that works on tasks in your repos.","openai.com/codex"],
+["Amazon Q Developer","code","Freemium","AWS coding assistant for building and debugging.","aws.amazon.com/q/developer"],
+["Tabnine","code","Paid","Code completion that can run privately in your company.","tabnine.com"],
+["Warp","code","Freemium","Terminal with AI help for commands and errors.","warp.dev"],
+["Cline","code","Free","Open-source coding agent for VS Code using your own API key.","cline.bot"],
+["Writesonic","write","Freemium","Articles, ads and SEO content generator.","writesonic.com"],
+["Wordtune","write","Freemium","Rewrites sentences to be clearer or more natural.","wordtune.com"],
+["Sudowrite","write","Paid","Writing partner built for fiction authors.","sudowrite.com"],
+["Rytr","write","Freemium","Simple, affordable writer for short copy and emails.","rytr.me"],
+["Napkin AI","res","Freemium","Turns text into diagrams and visuals automatically.","napkin.ai"],
+["Beautiful.ai","res","Paid","Slide design that adjusts layouts as you type.","beautiful.ai"],
+["Julius AI","res","Freemium","Upload data and ask questions to get charts and analysis.","julius.ai"],
+["Fathom","res","Free","Free meeting recorder with summaries and action items.","fathom.video"],
+["Taskade","res","Freemium","Tasks, notes and AI agents in one workspace.","taskade.com"],
+["Llama","open","Free","Meta’s open-weight models you can download and run.","llama.com"],
+["GPT4All","open","Free","Run chat models privately on a normal laptop.","gpt4all.io"],
+["Jan","open","Free","Open-source offline alternative to ChatGPT.","jan.ai"],
+["Langflow","open","Free","Visual builder for AI agents and workflows.","langflow.org"],
+["n8n","biz","Freemium","Workflow automation with AI agent nodes, self-hostable.","n8n.io"],
+["Make","biz","Freemium","Visual automation that connects thousands of apps.","make.com"],
+["Manus","biz","Freemium","General agent that carries out multi-step tasks for you.","manus.im"],
+["Lindy","biz","Freemium","Build AI assistants for email, scheduling and sales.","lindy.ai"],
+["Intercom Fin","biz","Paid","Customer support agent that resolves tickets.","intercom.com/fin"],
+["Agentforce","biz","Paid","Salesforce’s AI agents for sales and service.","salesforce.com/agentforce"],
+["Glean","biz","Paid","Searches and answers across all your company apps.","glean.com"],
+["Writer","biz","Paid","Enterprise AI platform with brand and compliance controls.","writer.com"]
 ];
-var st={q:"",p:"All",c:"all"};
-function chip(el,label,key,val,ico){var b=document.createElement("button");b.className="chip";b.type="button";b.innerHTML=(ico?ico+" ":"")+label;b.onclick=function(){st[key]=val;draw()};b.dataset.k=key;b.dataset.v=val;el.appendChild(b)}
+var st={q:"",p:"All",c:"all",f:"all"};var FV=[];try{FV=JSON.parse(localStorage.getItem("atlasFav")||"[]")}catch(e){}function saveFV(){try{localStorage.setItem("atlasFav",JSON.stringify(FV))}catch(e){}}
+function chip(el,label,key,val,ico){var b=document.createElement("button");b.className="chip";b.type="button";b.innerHTML=(ico?ico+" ":"")+label;b.onclick=function(){st[key]=(key==="f"&&st.f===val)?"all":val;draw()};b.dataset.k=key;b.dataset.v=val;el.appendChild(b)}
 ["All","Free","Freemium","Paid"].forEach(function(p){chip(document.getElementById("price"),p,"p",p)});
+chip(document.getElementById("price"),"Favorites","f","fav","♥");
 chip(document.getElementById("cats"),"All categories","c","all","✨");
 Object.keys(C).forEach(function(k){chip(document.getElementById("cats"),C[k][0],"c",k,C[k][1])});
 document.getElementById("q").oninput=function(e){st.q=e.target.value.toLowerCase();draw()};
 function esc(s){return s.replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function draw(){
 document.querySelectorAll(".chip").forEach(function(b){b.setAttribute("aria-pressed",String(st[b.dataset.k]===b.dataset.v))});
-var list=T.filter(function(t){return(st.p==="All"||t[2]===st.p)&&(st.c==="all"||t[1]===st.c)&&(!st.q||(t[0]+" "+t[3]+" "+C[t[1]][0]).toLowerCase().indexOf(st.q)>-1)});
+var list=T.filter(function(t){return(st.f!=="fav"||FV.indexOf(t[0])>-1)&&(st.p==="All"||t[2]===st.p)&&(st.c==="all"||t[1]===st.c)&&(!st.q||(t[0]+" "+t[3]+" "+C[t[1]][0]).toLowerCase().indexOf(st.q)>-1)});
 document.getElementById("count").textContent=list.length+" of "+T.length+" tools";
 var out=document.getElementById("out");
-if(!list.length){out.innerHTML='<div class="empty">No tools match. Clear the search or pick another filter.</div>';return}
+if(!list.length){out.innerHTML='<div class="empty">'+(st.f==="fav"&&!FV.length?"Tap the heart on any tool to save it here.":"No tools match. Clear the search or pick another filter.")+'</div>';return}
 out.innerHTML=Object.keys(C).map(function(k){
 var g=list.filter(function(t){return t[1]===k});if(!g.length)return"";
 return'<section><h2><span>'+C[k][1]+'</span>'+C[k][0]+' <small>'+g.length+'</small></h2><div class="grid">'+g.map(function(t){
-return'<a class="card" style="--c:'+C[k][2]+'" href="https://'+esc(t[4])+'" target="_blank" rel="noopener noreferrer"><div class="top"><div class="ico">'+C[k][1]+'</div><div class="name">'+esc(t[0])+'</div><span class="tag '+t[2]+'">'+t[2]+'</span></div><p class="desc">'+esc(t[3])+'</p></a>'}).join("")+'</div></section>'}).join("")}
+return'<a class="card" style="--c:'+C[k][2]+'" href="https://'+esc(t[4])+'" target="_blank" rel="noopener noreferrer"><div class="top"><div class="ico">'+C[k][1]+'</div><div class="name">'+esc(t[0])+'</div><span class="tag '+t[2]+'">'+t[2]+'</span><button type="button" class="fav" data-n="'+esc(t[0])+'" aria-pressed="'+(FV.indexOf(t[0])>-1)+'" aria-label="Save to favorites">'+(FV.indexOf(t[0])>-1?"♥":"♡")+'</button></div><p class="desc">'+esc(t[3])+'</p></a>'}).join("")+'</div></section>'}).join("")}
+var ADV=["Ollama","LM Studio","ComfyUI","Open WebUI","Langflow","Stable Diffusion","Cline","Warp","Gemini CLI","Claude Code","OpenAI Codex","n8n","Llama","Hugging Face","Tabnine","Windsurf","Cursor","Amazon Q Developer"];
+var G=[["Chat and answers","chat"],["Make images","img"],["Make videos","vid"],["Voice and music","aud"],["Write code","code"],["Write better","write"],["Study and research","res"],["Run AI privately","open"],["Automate work","biz"]];
+var W={g:"chat",b:"start",l:"new"};
+var wz=document.getElementById("wiz"),wb=document.getElementById("wizBody"),gb=document.getElementById("goBtn");
+function opts(title,key,list){return'<h3>'+title+'</h3><div class="row">'+list.map(function(o){return'<button type="button" class="chip" data-w="'+key+'" data-v="'+o[1]+'" aria-pressed="'+(W[key]===o[1])+'">'+o[0]+'</button>'}).join("")+'</div>'}
+function wiz(){
+var pool=T.filter(function(t){return t[1]===W.g}),note="";
+var m=pool.filter(function(t){return W.b==="any"||(W.b==="free"?t[2]==="Free":t[2]!=="Paid")});
+if(m.length<3&&W.b==="free"){m=pool.filter(function(t){return t[2]!=="Paid"});note="There are few fully free options here, so these include tools with a free plan."}
+var isA=function(t){return ADV.indexOf(t[0])>-1};
+if(W.l==="new"){var easy=m.filter(function(t){return!isA(t)});if(easy.length)m=easy}else m=m.filter(isA).concat(m.filter(function(t){return!isA(t)}));
+var r=m.slice(0,3);
+wb.innerHTML=opts("What do you want to do?","g",G)+opts("What can you spend?","b",[["Free to start","start"],["Fully free","free"],["Any price","any"]])+opts("How experienced are you?","l",[["Beginner","new"],["Advanced","adv"]])+'<h3>Your top picks</h3><div class="grid">'+r.map(function(t,i){var k=t[1];return'<a class="card" style="--c:'+C[k][2]+'" href="https://'+esc(t[4])+'" target="_blank" rel="noopener noreferrer"><div class="top"><div class="ico">'+(i+1)+'</div><div class="name">'+esc(t[0])+'</div><span class="tag '+t[2]+'">'+t[2]+'</span></div><p class="desc">'+esc(t[3])+'</p></a>'}).join("")+'</div>'+(note?'<p>'+note+'</p>':'')}
+wb.addEventListener("click",function(e){var b=e.target.closest("[data-w]");if(!b)return;W[b.dataset.w]=b.dataset.v;wiz()});
+gb.onclick=function(){var o=wz.hidden;wz.hidden=!o;gb.setAttribute("aria-expanded",String(o));gb.textContent=o?"Close helper":"Help me choose";if(o)wiz()};
+var S=[["🎓","Free for students","NotebookLM,Perplexity,Elicit,Grammarly,Gemini,Canva Magic Studio"],["🎬","YouTuber toolkit","ChatGPT,Opus Clip,CapCut,ElevenLabs,Ideogram,Descript"],["🛠️","Build an app, no code","Lovable,Bolt.new,v0,Replit,Google AI Studio"],["⌨️","Developer power kit","Cursor,Claude Code,GitHub Copilot,Gemini CLI,Warp,Ollama"],["📣","Content and marketing","Jasper,Writesonic,Canva Magic Studio,HeyGen,Zapier"],["🗓️","Meetings and focus","Fathom,Otter.ai,Notion AI,Gamma,Taskade"],["🎵","Music and voice creator","Suno,Udio,ElevenLabs,Adobe Podcast,Murf"],["🔒","Private and offline","Ollama,LM Studio,Jan,GPT4All,Open WebUI"]];
+var sel=-1,sr=document.getElementById("stackRow"),so=document.getElementById("stackOut");
+function byName(n){return T.filter(function(t){return t[0]===n})[0]}
+function sList(s){return s[2].split(",").map(byName).filter(Boolean)}
+sr.innerHTML=S.map(function(s,i){var l=sList(s),p=l.filter(function(t){return t[2]==="Paid"}).length;return'<button type="button" class="stack" data-s="'+i+'" aria-pressed="false"><span class="e">'+s[0]+'</span><b>'+s[1]+'</b><span>'+l.length+' tools, '+(p?p+' paid':'all free to start')+'</span></button>'}).join("");
+sr.addEventListener("click",function(e){var b=e.target.closest(".stack");if(!b)return;var i=+b.dataset.s;sel=sel===i?-1:i;sr.querySelectorAll(".stack").forEach(function(x){x.setAttribute("aria-pressed",String(+x.dataset.s===sel))});so.innerHTML=sel<0?"":'<div class="grid">'+sList(S[sel]).map(function(t){var k=t[1];return'<a class="card" style="--c:'+C[k][2]+'" href="https://'+esc(t[4])+'" target="_blank" rel="noopener noreferrer"><div class="top"><div class="ico">'+C[k][1]+'</div><div class="name">'+esc(t[0])+'</div><span class="tag '+t[2]+'">'+t[2]+'</span></div><p class="desc">'+esc(t[3])+'</p></a>'}).join("")+'</div>'});
+document.getElementById("out").addEventListener("click",function(e){var b=e.target.closest(".fav");if(!b)return;e.preventDefault();var n=b.dataset.n,i=FV.indexOf(n);if(i>-1)FV.splice(i,1);else FV.push(n);saveFV();draw()});
 draw();
 </script>
 </body>
